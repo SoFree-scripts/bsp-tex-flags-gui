@@ -27,7 +27,12 @@ SURF_FLAGS = {
     'skyreflect' : 0x4000, # liquid will somewhat reflect the sky - not quite finished....
     'map' : 0x8000, # used for the auto-map
     'region' : 0x10000,
-    'simple_spherical' : 0x20000
+    'simple_spherical' : 0x20000,
+    'type_gravel' : 0x00000000,
+    'type_metal' : 0x01000000,
+    'type_stone' : 0x02000000,
+    'type_wood' : 0x03000000,
+    'material' : 0xFF000000
 }
 
 def grab_lump(lump_num,a_sof_map):
