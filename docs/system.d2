@@ -1,0 +1,71 @@
+# bsp-tex-flags-gui — system overview (thin)
+# A one-file Tkinter tool: search term, pick a .bsp, decode lump 5, print the
+# flag names set on each matching texture. Nothing is written anywhere.
+# Zones run left to right: entry points -> core -> state -> external.
+# Style classes set strokes only, so light and dark stay readable.
+
+title: |md
+  # bsp-tex-flags-gui
+  A Tkinter window that decodes the texture lump of a Soldier of Fortune `.bsp` and prints the surface flags compiled into each texture.
+| {near: top-center}
+
+direction: right
+grid-columns: 2
+grid-rows: 2
+horizontal-gap: 140
+vertical-gap: 110
+
+entry: Entry points {
+  direction: down
+
+  gui: `python dump_tex_lump.py` · must run from the repo root, it loads `sof1r.ppm` and `sof1g.ppm` by relative path
+  type: type a search term · `*` for every texture, otherwise a substring of the name
+  button: click the button · only green once a term is typed, then opens the file dialog
+  build: `make_exe.py` · cx_Freeze recipe, frozen outputs already in `build/` and `bsp_tex_flags_gui.7z`
+}
+
+core: Core {
+  direction: down
+
+  read: read the file · whole `.bsp` into memory, no size check
+  lump: find lump 5 · 8-byte header then 8-byte entries of offset and size, `struct.unpack_from`
+  texinfo: walk 76-byte `texinfo` records · flags at +32, value at +36, 32-byte latin-1 name at +40
+  flags: match against `SURF_FLAGS` · bitwise AND per entry, insertion order is the print order
+  show: print · name line, one line per set flag, the value line for `light` and `animspeed`
+
+  read -> lump: the offset points into the same buffer
+  lump -> texinfo: a memoryview slice, never copied
+  texinfo -> flags: every record, matched or not
+  flags -> show: `needle in name` or `needle == "*"` decides what is printed
+}
+
+state: State {
+  direction: down
+
+  none: nothing persisted · no config, no history, no output file
+  table: `SURF_FLAGS` · 20 names and masks hardcoded in the script, `material` = `0xFF000000`
+}
+
+ext: External {
+  direction: down
+
+  bsp: `.bsp` map files · SoF v46 layout, dumped by whatever compiler made them
+  tk: Tk and ttk · `clam` theme, one scrollable text widget
+  freeze: cx_Freeze · `build/exe.win-amd64-3.9`, `build/exe.linux-x86_64-3.9`
+}
+
+entry -> core: term and file path are the only inputs
+core -> state: reads the table, writes nothing
+core -> ext: reads a map, draws into Tk
+
+classes: {
+  entry: {style: {stroke: "#2f6fbf"}}
+  core: {style: {stroke: "#2f8f5f"}}
+  state: {style: {stroke: "#a86a12"; stroke-dash: 3}}
+  ext: {style: {stroke: "#8a4fbf"; stroke-dash: 5}}
+}
+
+entry.class: entry
+core.class: core
+state.class: state
+ext.class: ext
